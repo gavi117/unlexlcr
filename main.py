@@ -94,8 +94,8 @@ VERSION_CHANGELOG = {
         ]
     }
 }
-BETA_VERSIONS = ["1.2.1"]
-RELEASED_VERSION = "1.2.2"
+BETA_VERSIONS = ["1.2.3"]
+RELEASED_VERSION = "1.2.3"
 
 # --- GUILD setting ---
 Official_Guild = 1395455459426570421
@@ -298,7 +298,7 @@ async def timezones_command(interaction: discord.Interaction, tz: str = None):
     await interaction.response.send_message(response)
 
 # ----- scmd#3 / dailytasks
-
+# --- constant ---
 WEEKLY_TASKS = {
     'Monday': [
         "Catch any OCG and Interrogate Them in RP Process",
@@ -388,6 +388,15 @@ async def dailytask_command(interaction: discord.Interaction):
 
 # -------------- prefix-commands -------------- 
 # ----- pcmd#1 /adminlist
+# --- constant ---
+rank_emojis = {
+    1: "🌱", 
+    2: "🌸", 
+    3: "🛡️", 
+    4: "🏮", 
+    5: "🏆", 
+    6: "👑"
+}
 # --- @ ---
 @bot.event
 async def on_message(message):
@@ -430,18 +439,18 @@ async def on_message(message):
         admins.sort(reverse=True)
         date_str = datetime.now().strftime('%Y/%m/%d')
 
-        admin_rank = len(admins)
-        header = f"# Admins List - {admin_rank}\n-# {date_str}\n"
+        admin_count = len(admins)
+        header = f"# Admins List - {admin_count}\n-# {date_str}\n"
         entries = []
-        for idx, (count, name) in enumerate(admins, start=1):
-            if count >= 6:
+        for idx, (rank, name) in enumerate(admins, start=1):
+            if rank >= 6:
                 emoji = "👑"
-            elif count == 5:
+            elif rank == 5:
                 emoji = "🎩"
             else:
-                emoji = ""
+                emoji = number_emojis.get(rank, str(rank))
             
-            line = f"{idx}. {emoji} ({count}) {name}" if emoji else f"{idx}. ({count}) {name}"
+            line = f"{idx}. {emoji} ({rank}) {name}" if emoji else f"{idx}. ({rank}) {name}"
             entries.append(line)
 
         batch = header
@@ -469,6 +478,12 @@ async def on_ready():
         except Exception as e:
             print(f"FAILED: Failed to sync commands for guild {guild_id}: {e}")
             
+    try:
+        synced = await bot.tree.sync()  # global
+        print(f"🌐 SYNCED {len(synced)} global (public) commands")
+    except Exception as e:
+        print(f"❌ FAILED to sync global commands: {e}")
+    
     # --- Set bot presence/status ---
     description = "Chatty Bot"
     activity = discord.Game(name=f"v{RELEASED_VERSION} • {description}")
